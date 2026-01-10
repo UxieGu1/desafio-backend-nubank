@@ -13,6 +13,8 @@ import lombok.Setter;
 @Setter
 public class ContatosRequestDTO {
 
+    private Long clienteId;
+
     @NotBlank(message = "Nome é obrigatório")
     private String nome;
 

@@ -27,5 +27,5 @@ public class Contatos extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
-    Clientes clientes = new Clientes();
+    Clientes clientes;
 }
