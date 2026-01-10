@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ContatosService {
@@ -50,11 +51,20 @@ public class ContatosService {
         
     }
 
-    public List<Contatos> listagemDeContatosPorClienteId(Long clienteId){
-        if(contatosRepository.findById(clienteId).isEmpty()){
-            throw new RuntimeException("O ID é obrigatório");
+    public List<ContatosResponseDTO> listagemDeContatosPorClienteId(Long clienteId){
+        if(!clientesRepository.existsById(clienteId)){
+            throw new RuntimeException("Cliente não encontrado");
         }
 
-        return contatosRepository.findAllById(Collections.singleton(clienteId));
+        List<Contatos> contatos = contatosRepository.findByClientesId(clienteId);
+
+        return contatos.stream()
+                .map(c -> new ContatosResponseDTO(
+                        c.getId(),
+                        c.getNome(),
+                        c.getEmail(),
+                        c.getTelefone()
+                ))
+                .collect(Collectors.toList());
     }
 }

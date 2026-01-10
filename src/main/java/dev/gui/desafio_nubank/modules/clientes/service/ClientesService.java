@@ -6,8 +6,8 @@ import dev.gui.desafio_nubank.modules.clientes.dto.ClientesResponseDTO;
 import dev.gui.desafio_nubank.modules.clientes.repository.ClientesRepository;
 import dev.gui.desafio_nubank.modules.contatos.Contatos;
 import dev.gui.desafio_nubank.modules.contatos.dto.ContatosResponseDTO;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -69,8 +69,31 @@ public class ClientesService {
                 .build();
     }
 
-    public List<Clientes> listagemDeClientes(){
-        return clientesRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<ClientesResponseDTO> listagemDeClientes() {
+        List<Clientes> clientes = clientesRepository.findAll();
+
+        return clientes.stream()
+                .map(cliente -> {
+                    List<ContatosResponseDTO> contatosDTO = cliente.getContatos() != null ?
+                            cliente.getContatos().stream()
+                                    .map(c -> new ContatosResponseDTO(
+                                            c.getId(),
+                                            c.getNome(),
+                                            c.getEmail(),
+                                            c.getTelefone()
+                                    )).collect(Collectors.toList()) : Collections.emptyList();
+
+                    return ClientesResponseDTO.builder()
+                            .id(cliente.getId())
+                            .nome(cliente.getNome())
+                            .email(cliente.getEmail())
+                            .contatos(contatosDTO)
+                            .createdAt(cliente.getCreatedAt())
+                            .updatedAt(cliente.getUpdatedAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
 }
