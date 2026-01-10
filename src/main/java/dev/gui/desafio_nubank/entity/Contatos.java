@@ -1,5 +1,6 @@
 package dev.gui.desafio_nubank.entity;
 
+import dev.gui.desafio_nubank.core.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,11 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Contatos {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Contatos extends BaseEntity {
 
     @Column(nullable = false)
     private String nome;
