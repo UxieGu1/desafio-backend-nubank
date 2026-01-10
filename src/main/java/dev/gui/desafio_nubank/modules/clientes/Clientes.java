@@ -1,7 +1,8 @@
-package dev.gui.desafio_nubank.entity;
+package dev.gui.desafio_nubank.modules.clientes;
 
 
 import dev.gui.desafio_nubank.core.BaseEntity;
+import dev.gui.desafio_nubank.modules.contatos.Contatos;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
