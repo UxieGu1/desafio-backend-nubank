@@ -7,21 +7,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class ContatosRequestDTO {
+public record ContatosRequestDTO(
+        Long clienteId,
 
-    private Long clienteId;
+        @NotBlank(message = "Nome é obrigatório")
+        String nome,
 
-    @NotBlank(message = "Nome é obrigatório")
-    private String nome;
+        @NotBlank(message = "Email é obrigatório")
+        @Email(message = "Email inválido")
+        String email,
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email inválido")
-    private String email;
+        @NotBlank(message = "Telefone é obrigatório")
+        String telefone
+) {
 
-    @NotBlank(message = "Telefone é obrigatório")
-    private String telefone;
+
 }

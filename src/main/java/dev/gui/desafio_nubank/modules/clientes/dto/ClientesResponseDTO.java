@@ -7,19 +7,14 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ClientesResponseDTO {
-
-    private Long id;
-    private String nome;
-    private String email;
-    private List<ContatosResponseDTO> contatos;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
+public record ClientesResponseDTO (
+        Long id,
+        String nome,
+        String email,
+        List<ContatosResponseDTO> contatos,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+){
 }

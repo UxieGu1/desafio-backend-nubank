@@ -1,99 +1,77 @@
 package dev.gui.desafio_nubank.modules.clientes.service;
 
-import dev.gui.desafio_nubank.modules.clientes.Clientes;
+import dev.gui.desafio_nubank.modules.clientes.entity.Clientes;
 import dev.gui.desafio_nubank.modules.clientes.dto.ClientesRequestDTO;
 import dev.gui.desafio_nubank.modules.clientes.dto.ClientesResponseDTO;
+import dev.gui.desafio_nubank.modules.clientes.mapper.ClientesMapper;
 import dev.gui.desafio_nubank.modules.clientes.repository.ClientesRepository;
-import dev.gui.desafio_nubank.modules.contatos.Contatos;
-import dev.gui.desafio_nubank.modules.contatos.dto.ContatosResponseDTO;
+import dev.gui.desafio_nubank.modules.contatos.entity.Contatos;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ClientesService {
 
     private final ClientesRepository clientesRepository;
+    private final ClientesMapper clientesMapper;
 
-    public ClientesService(ClientesRepository clientesRepository) {
-        this.clientesRepository = clientesRepository;
+    @Transactional
+    public ClientesResponseDTO cadastrarCliente(ClientesRequestDTO clientesRequest){
+        Clientes cliente = clientesMapper.toEntity(clientesRequest);
+        Clientes clienteSalvo = clientesRepository.save(cliente);
+
+        return clientesMapper.toResponse(clienteSalvo);
+    }
+
+    public List<ClientesResponseDTO> listarClientes(){
+        return clientesRepository
+                .findAll()
+                .stream()
+                .map(clientesMapper::toResponse)
+                .toList();
+    }
+
+    public ClientesResponseDTO listarClientePorId(Long id){
+        var clientePorId = clientesRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: "+ id));
+        return clientesMapper.toResponse(clientePorId);
     }
 
     @Transactional
-    public ClientesResponseDTO cadastrarCliente(ClientesRequestDTO requestDTO) {
-        if (clientesRepository.existsByEmail(requestDTO.getEmail())) {
-            throw new RuntimeException("Email já cadastrado");
-        }
+    public ClientesResponseDTO atualizarCliente(Long id, ClientesRequestDTO clientesRequest) {
 
-        Clientes cliente = new Clientes();
-        cliente.setNome(requestDTO.getNome());
-        cliente.setEmail(requestDTO.getEmail());
+        var cliente = clientesRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente com ID " + id + " não encontrado."));
 
-        if (requestDTO.getContatos() != null && !requestDTO.getContatos().isEmpty()) {
-            List<Contatos> contatosEntities = requestDTO.getContatos().stream()
-                    .map(contatoDTO -> {
-                        Contatos contato = new Contatos();
-                        contato.setNome(contatoDTO.getNome());
-                        contato.setEmail(contatoDTO.getEmail());
-                        contato.setTelefone(contatoDTO.getTelefone());
+        cliente.setNome(clientesRequest.nome());
+        cliente.setEmail(clientesRequest.email());
+        cliente.getContatos().clear();
 
+        if (clientesRequest.contatos() != null) {
+            var novosContatos = clientesRequest.contatos().stream()
+                    .map(dto -> {
+                        var contato = new Contatos();
+                        contato.setNome(dto.nome());
+                        contato.setEmail(dto.email());
+                        contato.setTelefone(dto.telefone());
                         contato.setClientes(cliente);
                         return contato;
-                    }).collect(Collectors.toList());
+                    }).toList();
 
-            cliente.setContatos(contatosEntities);
+            cliente.getContatos().addAll(novosContatos);
         }
-
-        Clientes clienteSalvo = clientesRepository.save(cliente);
-
-        List<ContatosResponseDTO> contatosResponse = clienteSalvo.getContatos() != null ?
-                clienteSalvo.getContatos().stream()
-                        .map(c -> new ContatosResponseDTO(
-                                c.getId(),
-                                c.getNome(),
-                                c.getEmail(),
-                                c.getTelefone()
-                        ))
-                        .collect(Collectors.toList()) : Collections.emptyList();
-
-        return ClientesResponseDTO.builder()
-                .id(clienteSalvo.getId())
-                .nome(clienteSalvo.getNome())
-                .email(clienteSalvo.getEmail())
-                .contatos(contatosResponse)
-                .createdAt(clienteSalvo.getCreatedAt())
-                .updatedAt(clienteSalvo.getUpdatedAt())
-                .build();
+        var clienteAtualizado = clientesRepository.save(cliente);
+        return clientesMapper.toResponse(clienteAtualizado);
     }
 
-    @Transactional(readOnly = true)
-    public List<ClientesResponseDTO> listagemDeClientes() {
-        List<Clientes> clientes = clientesRepository.findAll();
+    public void deletarCliente(Long id){
+        var cliente = clientesRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente com ID " + id + " não encontrado."));
 
-        return clientes.stream()
-                .map(cliente -> {
-                    List<ContatosResponseDTO> contatosDTO = cliente.getContatos() != null ?
-                            cliente.getContatos().stream()
-                                    .map(c -> new ContatosResponseDTO(
-                                            c.getId(),
-                                            c.getNome(),
-                                            c.getEmail(),
-                                            c.getTelefone()
-                                    )).collect(Collectors.toList()) : Collections.emptyList();
-
-                    return ClientesResponseDTO.builder()
-                            .id(cliente.getId())
-                            .nome(cliente.getNome())
-                            .email(cliente.getEmail())
-                            .contatos(contatosDTO)
-                            .createdAt(cliente.getCreatedAt())
-                            .updatedAt(cliente.getUpdatedAt())
-                            .build();
-                })
-                .collect(Collectors.toList());
+        clientesRepository.delete(cliente);
     }
-
 }

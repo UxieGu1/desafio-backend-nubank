@@ -1,14 +1,11 @@
-package dev.gui.desafio_nubank.modules.clientes;
+package dev.gui.desafio_nubank.modules.clientes.entity;
 
 
 import dev.gui.desafio_nubank.core.BaseEntity;
-import dev.gui.desafio_nubank.modules.contatos.Contatos;
+import dev.gui.desafio_nubank.modules.contatos.entity.Contatos;
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Clientes extends BaseEntity {
 
     @Column(nullable = false)
@@ -27,6 +25,7 @@ public class Clientes extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Builder.Default
     @OneToMany(mappedBy = "clientes", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contatos> contatos = new ArrayList<Contatos>();
 

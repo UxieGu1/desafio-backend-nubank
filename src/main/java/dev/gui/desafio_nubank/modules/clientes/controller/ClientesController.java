@@ -6,6 +6,7 @@ import dev.gui.desafio_nubank.modules.clientes.service.ClientesService;
 import dev.gui.desafio_nubank.modules.contatos.dto.ContatosResponseDTO;
 import dev.gui.desafio_nubank.modules.contatos.service.ContatosService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,16 +15,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/clientes")
+@RequiredArgsConstructor
 public class ClientesController {
-
 
     private final ClientesService clientesService;
     private final ContatosService contatosService;
 
-    public ClientesController(ClientesService clientesService, ContatosService contatosService) {
-        this.clientesService = clientesService;
-        this.contatosService = contatosService;
-    }
 
     @PostMapping()
     public ResponseEntity<Object> cadastrarCliente(@RequestBody @Valid ClientesRequestDTO requestDTO){
@@ -38,7 +35,7 @@ public class ClientesController {
     @GetMapping
     public ResponseEntity<Object> listagemDeClientes() {
         try {
-            List<ClientesResponseDTO> listaClientes = clientesService.listagemDeClientes();
+            List<ClientesResponseDTO> listaClientes = clientesService.listarClientes();
 
             return ResponseEntity.ok(listaClientes);
 
